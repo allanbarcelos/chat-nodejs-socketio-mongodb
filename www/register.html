@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="register-form">
+        <div>
+            <label for="name">Name:</label>
+            <input type="name" name="name" required />
+          </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" required />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required />
+      </div>
+      <div>
+        <button type="submit">Register</button>
+      </div>
+    </form>
+
+    <script>
+      const form = document.querySelector("#register-form");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const name = formData.get("name");
+
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        const response = await fetch("http://localhost:3000/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({name, email, password }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          alert(errorText);
+          return;
+        }
+
+        const { token } = await response.json();
+        localStorage.setItem("token", token);
+
+        window.location.href = "/login.html";
+      });
+    </script>
+</body>
+</html>

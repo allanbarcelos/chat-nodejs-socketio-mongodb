@@ -1,0 +1,22 @@
+###
+# @name register
+POST http://localhost:3000/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Allan",
+    "email": "allan@barcelos.dev",
+    "password": "passwd"
+}
+
+
+
+###
+# @name login
+POST http://localhost:3000/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "allan@barcelos.dev",
+    "password": "passwd"
+}

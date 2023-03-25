@@ -1,0 +1,4 @@
+- check if DOcker is installed in your system , if not go to https://www.docker.com
+- to run the project open the terminal and type  [ docker-compose up -d ] (without brakets)
+- the API will started in http://localhost:3000
+- the APP will start in http://localhost
