@@ -1,13 +1,13 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Chat API",
+  "main": "api.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon -x 'node api.js || (sleep 10; touch api.js)'",
+    "test": "jest"
   },
-  "author": "",
+  "author": "Allan Barcelos",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,6 +17,13 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.1.0",
+    "nodemon": "^2.0.22",
     "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "mongodb-memory-server": "^8.12.1",
+    "sinon": "^15.0.3",
+    "supertest": "^6.3.3"
   }
 }

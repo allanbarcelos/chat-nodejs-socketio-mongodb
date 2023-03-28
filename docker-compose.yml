@@ -2,15 +2,20 @@ version: "2"
 services:
     api:
         image: node
+        env_file:
+            - .env
         ports: 
-            - "3000:3000"
+            - "${PORT}:${PORT}"
         volumes:
             - ./api:/usr/api
         depends_on:
             - db
         working_dir: /usr/api
         environment:
-            - MONGO_URI=mongodb://admin:password@db:27017
+            - MONGO_URI=${MONGO_URI}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - API_SECRET=${API_SECRET}
+            - PORT=${PORT}
         command: bash -c "npm install && npm start"
         networks:
             - default
@@ -26,9 +31,9 @@ services:
         image: mongo
         restart: always
         environment:
-            - MONGO_INITDB_ROOT_USERNAME=admin
-            - MONGO_INITDB_ROOT_PASSWORD=password
-            - MONGO_INITDB_ROOT_DATABASE=chat
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+            - MONGO_INITDB_ROOT_DATABASE=${MONGO_INITDB_ROOT_DATABASE}
         ports:
             - "27017:27017"
         networks:
