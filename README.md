@@ -11,4 +11,4 @@ I this this POC (Proof Of Concept) were created a docker-compose for run in one 
 runing together, in real world you will run this in multiples servers or in a cloud server with balance.
 
 
-[Online DEMO](http://chat.barcelos.dev)
+[Online DEMO](http://45.42.200.181)
