@@ -21,6 +21,8 @@ services:
             - default
     www:
         image: nginx
+        env_file:
+            - .env
         ports: 
             - "80:80"
         volumes:
