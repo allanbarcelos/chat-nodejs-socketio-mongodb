@@ -7,7 +7,7 @@
 - to stop and exclude the created volumes <code>docker-compose down -v/</code>
 
 ### Attention
-I this this POC (Proof Of Concept) were created a docker-compose for run in one server and the services
+In this POC (Proof Of Concept) was created a docker-compose for run in one server and the services
 runing together, in real world you will run this in multiples servers or in a cloud server with balance.
 
 
