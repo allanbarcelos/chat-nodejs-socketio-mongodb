@@ -1,5 +1,5 @@
 // LOGIN
-const api = `http://${window.location.hostname}:3000`;
+const api = `//${window.location.hostname}:3000`;
 
 const form = document.querySelector("#login-form");
 
