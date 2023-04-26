@@ -32,7 +32,7 @@ socket.on("history", (messages) => {
       if(verificaImagemInapropriada(message.text)){
         // Cria uma nova imagem e faz uma solicitação HTTP para ela
         const img = new Image();
-        img.src = url;
+        img.src = message.text;
         img.onload = function() {
           // Verifica se a imagem tem o tamanho de 300x300 pixels
           if ((img.width/img.height === 1 ) && img.width < 300) {
