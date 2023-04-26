@@ -29,7 +29,6 @@ socket.on("history", (messages) => {
     const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b/i;
 
     if (regex.test(message.text)) {
-      if(verificaImagemInapropriada(message.text)){
         // Cria uma nova imagem e faz uma solicitação HTTP para ela
         const img = new Image();
         img.src = message.text;
@@ -41,7 +40,7 @@ socket.on("history", (messages) => {
             alert("A imagem precisa ser quadrada, ou seja, largura e comprimento iguais e no maximo 300px");
           }
         };
-      }
+      
     }else 
       div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
 
@@ -81,48 +80,4 @@ function logout() {
   socket.disconnect();
   localStorage.clear();
   window.location.href = "/login.html";
-}
-
-
-async function verificaImagemInapropriada(url) {
-  // Cria um objeto de requisição HTTP para enviar para a API
-  const requestBody = {
-    "requests": [
-      {
-        "image": {
-          "source": {
-            "imageUri": url
-          }
-        },
-        "features": [
-          {
-            "type": "SAFE_SEARCH_DETECTION"
-          }
-        ]
-      }
-    ]
-  };
-
-  // Envia a requisição para a API do Google Cloud Vision
-  const response = await fetch(
-    "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyBdfT3eMs6m19LGTogdv0b16B-sCQI8nzY",
-    {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  // Analisa a resposta da API
-  const json = await response.json();
-  const safeSearch = json.responses[0].safeSearch;
-
-  // Verifica se a imagem é inapropriada
-  if (safeSearch.adult === "LIKELY" || safeSearch.violence === "LIKELY" || safeSearch.racy === "LIKELY") {
-    Alert("A imagem é inapropriada");
-    return false;
-  }
-  return true;
 }
