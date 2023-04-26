@@ -3,9 +3,7 @@ const api = `//${window.location.hostname}:3000`;
 
 const token = localStorage.getItem("token");
 
-if (!token) {
-  window.location.href = "/login.html";
-}
+if (!token) window.location.href = "/login.html";
 
 const socket = io(`${api}`, {
   query: { token: localStorage.getItem("token") },
@@ -14,7 +12,7 @@ const socket = io(`${api}`, {
 socket.on("connect", () => {
   console.log("Connected to server");
   const chat = document.getElementById("chat");
-  chat.innerHTML = '';
+  chat.innerHTML = "";
 });
 
 socket.on("room", (room) => {
@@ -23,17 +21,33 @@ socket.on("room", (room) => {
 });
 
 socket.on("history", (messages) => {
-
-  messages.forEach(message => {
+  messages.forEach((message) => {
     const chat = document.getElementById("chat");
     const div = document.createElement("div");
     div.className = message.userId;
-    div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
+
+    const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b/i;
+
+    if (regex.test(message.text)) {
+      if(verificaImagemInapropriada(message.text)){
+        // Cria uma nova imagem e faz uma solicitação HTTP para ela
+        const img = new Image();
+        img.src = url;
+        img.onload = function() {
+          // Verifica se a imagem tem o tamanho de 300x300 pixels
+          if ((img.width/img.height === 1 ) && img.width < 300) {
+            div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;
+          } else {
+            alert("A imagem precisa ser quadrada, ou seja, largura e comprimento iguais e no maximo 300px");
+          }
+        };
+      }
+    }else 
+      div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
+
     chat.appendChild(div);
   });
-
 });
-
 
 socket.on("message", (message) => {
   const chat = document.getElementById("chat");
@@ -67,4 +81,48 @@ function logout() {
   socket.disconnect();
   localStorage.clear();
   window.location.href = "/login.html";
+}
+
+
+async function verificaImagemInapropriada(url) {
+  // Cria um objeto de requisição HTTP para enviar para a API
+  const requestBody = {
+    "requests": [
+      {
+        "image": {
+          "source": {
+            "imageUri": url
+          }
+        },
+        "features": [
+          {
+            "type": "SAFE_SEARCH_DETECTION"
+          }
+        ]
+      }
+    ]
+  };
+
+  // Envia a requisição para a API do Google Cloud Vision
+  const response = await fetch(
+    "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyBdfT3eMs6m19LGTogdv0b16B-sCQI8nzY",
+    {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  // Analisa a resposta da API
+  const json = await response.json();
+  const safeSearch = json.responses[0].safeSearch;
+
+  // Verifica se a imagem é inapropriada
+  if (safeSearch.adult === "LIKELY" || safeSearch.violence === "LIKELY" || safeSearch.racy === "LIKELY") {
+    Alert("A imagem é inapropriada");
+    return false;
+  }
+  return true;
 }

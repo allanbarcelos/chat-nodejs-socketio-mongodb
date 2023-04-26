@@ -11,16 +11,12 @@ registerButton.style.display = "block";
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-
   loadingButton.style.display = "block";
   registerButton.style.display = "none";
-
   const formData = new FormData(form);
   const name = formData.get("name");
-
   const email = formData.get("email");
   const password = formData.get("password");
-
   const response = await fetch(`${api}/register`, {
     method: "POST",
     headers: {
@@ -31,16 +27,13 @@ form.addEventListener("submit", async (event) => {
     loadingButton.style.display = "none";
     registerButton.style.display = "block";
   });
-
   if (!response?.ok) {
     const errorText = await response?.text();
     if (errorText) alert(errorText);
     else alert("System Failure");
     return;
   }
-
   const { token } = await response.json();
   localStorage.setItem("token", token);
-
   window.location.href = "/login.html";
 });

@@ -111,6 +111,10 @@ io.use(async (socket, next) => {
     // const room = new mongodb.ObjectId(decoded.room);
     socket.user = user;
     socket.room = decoded.room;
+
+    if(decoded.expiresIn < new Date())
+      io.to(socket.room).emit("expired_session", socket.room);
+
     next();
   } catch (err) {
     next(new Error("Authentication error"));

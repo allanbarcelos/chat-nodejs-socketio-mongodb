@@ -4,7 +4,7 @@
 - the API will started in http://localhost:3000
 - the APP will start in http://localhost
 - to stop  type in terminal <code>docker-compose down</code> or 
-- to stop and exclude the created volumes <code>docker-compose down -v/</code>
+- to stop and exclude the created volumes <code>docker-compose down -v</code>
 
 ### Attention
 In this POC (Proof Of Concept) was created a docker-compose for run in one server and the services
