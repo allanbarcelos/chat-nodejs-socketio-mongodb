@@ -29,20 +29,8 @@ socket.on("history", (messages) => {
     const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b/i;
 
     if (regex.test(message.text)) {
-        // Cria uma nova imagem e faz uma solicitação HTTP para ela
-        const img = new Image();
-        img.src = message.text;
-        img.onload = function() {
-          // Verifica se a imagem tem o tamanho de 300x300 pixels
-          if ((img.width/img.height === 1 ) && img.width < 300) {
-            div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;
-          } else {
-            alert("A imagem precisa ser quadrada, ou seja, largura e comprimento iguais e no maximo 300px");
-          }
-        };
-      
-    }else 
-      div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
+      div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;
+    } else div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
 
     chat.appendChild(div);
   });
@@ -52,7 +40,24 @@ socket.on("message", (message) => {
   const chat = document.getElementById("chat");
   const div = document.createElement("div");
   div.className = message.userId;
-  div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
+
+  const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b/i;
+
+  if (regex.test(message.text)) {
+    // Cria uma nova imagem e faz uma solicitação HTTP para ela
+    const img = new Image();
+    img.src = message.text;
+    img.onload = function () {
+      console.log(img.width, img.height)
+      // Verifica se a imagem tem o tamanho de 300x300 pixels
+      if (img.width / img.height === 1 && img.width <= 300) {
+        div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;
+      } else {
+        alert("A imagem precisa ser quadrada, ou seja, largura e comprimento iguais e no maximo 300px");
+      }
+    };
+  } else div.innerHTML = `<strong>${message.userName}</strong>: ${message.text}`;
+
   chat.appendChild(div);
   beep();
 });
