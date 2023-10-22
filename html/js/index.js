@@ -7,7 +7,7 @@ const token = localStorage.getItem("token");
 
 if (!token) window.location.href = "/login.html";
 
-const socket = io(`${api}`, {
+const socket = io(`${api}/socket.io`, {
   query: { token: localStorage.getItem("token") },
 });
 
