@@ -1,5 +1,7 @@
 const dotenv = require('dotenv');
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+console.log("PATH: ", path.join(__dirname, '.env'))
 
 const express = require("express");
 const http = require("http");
