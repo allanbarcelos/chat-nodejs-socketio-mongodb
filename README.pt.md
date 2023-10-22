@@ -1,5 +1,7 @@
 # Simple NODEJs Chat
 
+Português| [English](README.md)
+
 ## Introdução
 Esta aplicação é um simples chat em tempo real que utiliza Node.js, Socket.io e MongoDB. Ela permite que os usuários se conectem e conversem em salas de chat criadas dinamicamente. Esta documentação irá guiá-lo através dos passos para configurar e usar a aplicação.
 
