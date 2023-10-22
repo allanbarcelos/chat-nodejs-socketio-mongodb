@@ -20,7 +20,7 @@ const io = socketio(server, {
   },
 });
 
-const mongoClient = new mongodb.MongoClient(process.env.MONGO_URI || 'mongodb://localhost:27017', {
+const mongoClient = new mongodb.MongoClient(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
