@@ -1,5 +1,5 @@
 // INDEX
-const api = `//${window.location.hostname}/api`;
+const api = `/api/socket.io`;
 
 const token = localStorage.getItem("token");
 
