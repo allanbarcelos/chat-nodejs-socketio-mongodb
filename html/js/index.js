@@ -1,13 +1,11 @@
 // INDEX
-const api = `/api`;
-
-console.log(api);
+const api = `//${window.location.hostname}/api`;
 
 const token = localStorage.getItem("token");
 
 if (!token) window.location.href = "/login.html";
 
-const socket = io(`${api}/socket.io`, {
+const socket = io(`${api}`, {
   query: { token: localStorage.getItem("token") },
 });
 

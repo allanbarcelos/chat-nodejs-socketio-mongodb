@@ -26,7 +26,6 @@ const io = socketio(server, {
   cors: {
     origin: "*",
   },
-  path: '/api/socket.io',
 });
 
 const mongoClient = new mongodb.MongoClient(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017', {
