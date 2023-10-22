@@ -47,6 +47,12 @@ jobs:
               rm -Rf ${{ secrets.HOME }}/chat.barcelos.dev
             fi
 
+      - name: Create .env file
+        run: |
+          echo "PORT=${{ secrets.PORT }}" > .env
+          echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
+          echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> .env
+
       - name: Deploy with rsync
         run: |
           rsync --progress -avz -e "ssh -v -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.HOME }}/chat.barcelos.dev/
