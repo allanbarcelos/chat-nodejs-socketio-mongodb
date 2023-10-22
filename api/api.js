@@ -28,6 +28,8 @@ const io = socketio(server, {
   },
 });
 
+const apiNamespace = io.of("/api");
+
 const mongoClient = new mongodb.MongoClient(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -113,7 +115,7 @@ app.post("/api/login", async (req, res) => {
   res.json({ token });
 });
 
-io.use(async (socket, next) => {
+apiNamespace.use(async (socket, next) => {
   try {
     const token = socket.handshake.query.token;
     const decoded = jwt.verify(token, process.env.API_SECRET);
@@ -125,7 +127,7 @@ io.use(async (socket, next) => {
     socket.room = decoded.room;
 
     if(decoded.expiresIn < new Date())
-      io.to(socket.room).emit("expired_session", socket.room);
+      apiNamespace.to(socket.room).emit("expired_session", socket.room);
 
     next();
   } catch (err) {
@@ -133,16 +135,16 @@ io.use(async (socket, next) => {
   }
 });
 
-io.on("connection", async (socket) => {
+apiNamespace.on("connection", async (socket) => {
   console.log(`${socket.user.name} connected in ${socket.room}`);
 
   socket.join(socket.room);
 
   const history = (await db.collection(messagesCollection).find({room: socket.room }).toArray());
 
-  io.to(socket.room).emit("room", socket.room);
+  apiNamespace.to(socket.room).emit("room", socket.room);
 
-  io.to(socket.room).emit("history", history);
+  apiNamespace.to(socket.room).emit("history", history);
 
   socket.on("message", async (text) => {
     const message = {
@@ -155,7 +157,7 @@ io.on("connection", async (socket) => {
 
     await db.collection(messagesCollection).insertOne(message);
 
-    io.to(socket.room).emit("message", message);
+    apiNamespace.to(socket.room).emit("message", message);
   });
 
   socket.on("disconnect", () => {
