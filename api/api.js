@@ -13,6 +13,7 @@ const bcrypt = require("bcryptjs");
 const mongodb = require("mongodb");
 var cors = require("cors");
 const app = express();
+app.disable('x-powered-by');
 
 app.use(
   cors({
