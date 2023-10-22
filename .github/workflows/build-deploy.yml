@@ -49,9 +49,9 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "PORT=${{ secrets.PORT }}" > .env
-          echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
-          echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" > ./api/.env
+          echo "API_SECRET=${{ secrets.API_SECRET }}" >> ./api/.env
+          echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> ./api/.env
 
       - name: Deploy with rsync
         run: |
