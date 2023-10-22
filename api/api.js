@@ -50,11 +50,11 @@ const roomsCollection = "rooms";
 
 // --
 
-app.get("/", async (req, res) => {
+app.get("/api/", async (req, res) => {
   res.json({ message: "Chat API" });
 })
 
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   const existingUser = await db.collection(usersCollection).findOne({ email });
@@ -76,7 +76,7 @@ app.post("/register", async (req, res) => {
   res.json({ message: "User created successfully" });
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password, typeRoom, roomID } = req.body;
 
   const user = await db.collection(usersCollection).findOne({ email });
