@@ -49,6 +49,10 @@ const roomsCollection = "rooms";
 
 // --
 
+app.get("/", async (req, res) => {
+  res.json({ message: "Chat API" });
+})
+
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
