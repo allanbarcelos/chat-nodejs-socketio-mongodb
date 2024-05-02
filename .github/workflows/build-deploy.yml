@@ -42,9 +42,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            folder="${{secrets.HOME}}/chat.barcelos.dev"
+            folder="${{secrets.HOME}}/${{secrets.PROJ_NAME}}.barcelos.dev"
             if [ -d "$folder" ]; then
-              rm -Rf ${{ secrets.HOME }}/chat.barcelos.dev
+              rm -Rf ${{ secrets.HOME }}/${{secrets.PROJ_NAME}}.barcelos.dev
             fi
 
       - name: Create .env file
@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy with rsync
         run: |
-          rsync --progress -avz -e "ssh -v -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.HOME }}/chat.barcelos.dev/
+          rsync --progress -avz -e "ssh -v -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.HOME }}/${{secrets.PROJ_NAME}}.barcelos.dev/
 
       - name: Install package in API
         uses: appleboy/ssh-action@master
@@ -65,8 +65,24 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ${{ secrets.HOME }}/chat.barcelos.dev/api
+            cd ${{ secrets.HOME }}/${{secrets.PROJ_NAME}}.barcelos.dev/api
             npm i
+
+      - name: API Start/Restart
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            pm2 describe ${{secrets.PM2_PROCESS_NAME}} > /dev/null
+            if [ $? -ne 0 ]; then
+              echo "Process not found, starting it..."
+              pm2 start ${{ secrets.HOME }}/${{secrets.PROJ_NAME}}.barcelos.dev/api/api.js --name ${{secrets.PM2_PROCESS_NAME}}
+            else
+              pm2 -s restart ${{secrets.PM2_PROCESS_NAME}}
+            fi
 
       - name: Restart Nginx
         uses: appleboy/ssh-action@master
@@ -76,5 +92,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            pm2 restart chat-api
             systemctl reload nginx
