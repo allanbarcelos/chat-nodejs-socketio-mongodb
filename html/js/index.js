@@ -1,11 +1,12 @@
 // INDEX
-const api = `https://${window.location.hostname}/api`;
+const api = `//${window.location.hostname}`;
 
 const token = localStorage.getItem("token");
 
 if (!token) window.location.href = "/login.html";
 
 const socket = io(`${api}`, {
+  // path: "/api/socket.io",
   query: { token: localStorage.getItem("token") },
 });
 
@@ -69,6 +70,7 @@ chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = messageInput.value.trim();
   if (text) {
+    console.log(text);
     socket.emit("message", text);
     messageInput.value = "";
   }
