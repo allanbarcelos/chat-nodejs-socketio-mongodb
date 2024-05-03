@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const NSFWJS = require('nsfwjs');
 const cron = require('node-cron');
+const crypto = require('crypto');
 
 const http = require('http');
 const https = require('https');
@@ -175,8 +176,9 @@ io.on("connection", async (socket) => {
 
       const directory = '/tmp';
       const fileName = path.basename(imageUrl);
-
-      const filePath = path.join(directory, fileName);
+      const ext = path.extname(fileName);
+      const hash = crypto.createHash('md5').update(fileName).digest('hex');
+      const filePath = path.join(directory, `${hash}${ext}`);
       const file = fs.createWriteStream(filePath);
 
 
