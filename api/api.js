@@ -163,54 +163,65 @@ io.on("connection", async (socket) => {
 
     if (imageUrl) {
 
-      io.to(socket.room).emit("message", {
-        userId: "SYSTEM",
-        userName: "System",
-        room: socket.room,
-        text: "Wait, processing image",
-        timestamp: new Date(),
-      });
+      try {
 
-      imageUrl = imageUrl[0];
-      const nsfwjs = await loadModel();
-
-      const directory = '/tmp';
-      const fileName = path.basename(imageUrl);
-      const ext = path.extname(fileName);
-      const hash = crypto.createHash('md5').update(fileName).digest('hex');
-      const filePath = path.join(directory, `${hash}${ext}`);
-      const file = fs.createWriteStream(filePath);
-
-
-      const client = imageUrl.startsWith('https') ? https : http;
-
-      await new Promise((resolve, reject) => {
-        client.get(imageUrl, async function (response) {
-          response.pipe(file);
-
-          await new Promise((resolve, reject) => {
-            file.on('finish', async function () {
-              file.close();
-              console.log('Imagem salva com sucesso em ' + filePath);
-              const img = await loadImage(filePath);
-              const predictions = await nsfwjs.classify(img);
-              console.log(predictions);
-              if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.15)) {
-                text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
-                console.log(text);
-              }
-              resolve();
-            }).on('error', function (err) { reject(err) });
-          })
-
-          resolve();
-        }).on('error', function (err) {
-          fs.unlink(filePath);
-          console.error('Erro ao salvar a imagem: ', err.message);
-          reject(err);
+        io.to(socket.room).emit("message", {
+          userId: "SYSTEM",
+          userName: "System",
+          room: socket.room,
+          text: "Wait, processing image",
+          timestamp: new Date(),
         });
-      });
 
+        imageUrl = imageUrl[0];
+        const nsfwjs = await loadModel();
+
+        const directory = '/tmp';
+        const fileName = path.basename(imageUrl);
+        const ext = path.extname(fileName);
+        const hash = crypto.createHash('md5').update(fileName).digest('hex');
+        const filePath = path.join(directory, `${hash}${ext}`);
+        const file = fs.createWriteStream(filePath);
+
+
+        const client = imageUrl.startsWith('https') ? https : http;
+
+        await new Promise((resolve, reject) => {
+          client.get(imageUrl, async function (response) {
+            response.pipe(file);
+            await new Promise((resolve, reject) => {
+              file.on('finish', async function () {
+                file.close();
+                console.log('Imagem salva com sucesso em ' + filePath);
+                const img = await loadImage(filePath);
+                const predictions = await nsfwjs.classify(img);
+                console.log(predictions);
+                if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.15)) {
+                  text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
+                  console.log(text);
+                }
+                resolve();
+              }).on('error', function (err) {
+                reject(err)
+              });
+            })
+
+            resolve();
+          }).on('error', function (err) {
+            fs.unlink(filePath);
+            console.error('Erro ao salvar a imagem: ', err.message);
+            reject(err);
+          });
+        });
+      } catch (error) {
+        io.to(socket.room).emit("message", {
+          userId: "SYSTEM",
+          userName: "System",
+          room: socket.room,
+          text: "Failed to process image, check if it is a valid image.",
+          timestamp: new Date(),
+        });
+      }
     }
 
     const message = {
