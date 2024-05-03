@@ -160,6 +160,7 @@ io.on("connection", async (socket) => {
     let imageUrl = text.match(imageUrlRegex);
 
     if (imageUrl) {
+
       imageUrl = imageUrl[0];
       const nsfwjs = await loadModel();
       console.log(imageUrl);
@@ -173,29 +174,28 @@ io.on("connection", async (socket) => {
 
       const client = imageUrl.startsWith('https') ? https : http;
 
-      client.get(imageUrl, async function (response) {
-        console.log("AQUI");
-
-        response.pipe(file);
-
-        file.on('finish', async function () {
-          file.close();
-          console.log('Imagem salva com sucesso em ' + filePath);
-          const img = await loadImage(filePath);
-          const predictions = await nsfwjs.classify(img);
-          console.log(predictions);
-          if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.01)) {
-            text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
-          }
+      await new Promise((resolve, reject) => {
+        client.get(imageUrl, async function (response) {
+          console.log("AQUI");
+          response.pipe(file);
+          file.on('finish', async function () {
+            file.close();
+            console.log('Imagem salva com sucesso em ' + filePath);
+            const img = await loadImage(filePath);
+            const predictions = await nsfwjs.classify(img);
+            console.log(predictions);
+            if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.01)) {
+              text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
+              console.log(text);
+            }
+          });
+          resolve();
+        }).on('error', function (err) {
+          fs.unlink(filePath);
+          console.error('Erro ao salvar a imagem: ', err.message);
+          reject(err);
         });
-
-      }).on('error', function (err) {
-        fs.unlink(filePath);
-        console.error('Erro ao salvar a imagem: ', err.message);
       });
-
-
-
     }
 
     const message = {
@@ -207,6 +207,7 @@ io.on("connection", async (socket) => {
     };
 
     console.log(message);
+
     await db.collection(messagesCollection).insertOne(message);
 
     io.to(socket.room).emit("message", message);
