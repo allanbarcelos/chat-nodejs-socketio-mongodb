@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const NSFWJS = require('nsfwjs');
+const cron = require('node-cron');
 
 const http = require('http');
 const https = require('https');
@@ -252,5 +253,11 @@ async function loadImage(filePath) {
   const image = tfn.node.decodeImage(buffer);
   return image;
 }
+
+cron.schedule('*/15 * * * *', async () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  await db.collection(messagesCollection).deleteMany({ timestamp: { $lt: yesterday } });
+});
 
 module.exports = app;

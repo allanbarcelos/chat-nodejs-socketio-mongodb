@@ -21,6 +21,7 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.1.0",
+    "node-cron": "^3.0.3",
     "nodemon": "^2.0.22",
     "nsfwjs": "^4.1.0",
     "socket.io": "^4.6.1"
