@@ -49,7 +49,6 @@ socket.on("message", (message) => {
     const img = new Image();
     img.src = message.text;
     img.onload = function () {
-      console.log(img.width, img.height)
       // Verifica se a imagem tem o tamanho de 300x300 pixels
       if (img.width / img.height === 1 && img.width <= 300) {
         div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;

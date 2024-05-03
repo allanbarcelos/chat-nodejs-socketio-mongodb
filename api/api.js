@@ -1,12 +1,21 @@
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
+const NSFWJS = require('nsfwjs');
+
+const http = require('http');
+const https = require('https');
+
+const tf = require('@tensorflow/tfjs-node');
+tf.enableProdMode();
+
+const tfn = require('@tensorflow/tfjs-node');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 console.log("PATH: ", path.join(__dirname, '.env'))
 
 const express = require("express");
-const http = require("http");
 const socketio = require("socket.io");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -93,17 +102,17 @@ app.post("/api/login", async (req, res) => {
 
   let _room = "general";
 
-  if(typeRoom === "room-id"){
+  if (typeRoom === "room-id") {
     _room = (await db.collection(roomsCollection).findOne({ roomID }))?.roomID;
-    if(!_room)
+    if (!_room)
       return res.status(400).json({ message: "Room not exist" });
   }
 
-  if(typeRoom === "new-room"){
+  if (typeRoom === "new-room") {
     do {
       _room = makeid(8);
-    }while (await db.collection(roomsCollection).findOne({ roomID: _room }));
-    await db.collection(roomsCollection).insertOne({roomID: _room});
+    } while (await db.collection(roomsCollection).findOne({ roomID: _room }));
+    await db.collection(roomsCollection).insertOne({ roomID: _room });
   }
 
   const token = jwt.sign({ id: user._id, room: _room }, process.env.API_SECRET, {
@@ -124,7 +133,7 @@ io.use(async (socket, next) => {
     socket.user = user;
     socket.room = decoded.room;
 
-    if(decoded.expiresIn < new Date())
+    if (decoded.expiresIn < new Date())
       io.to(socket.room).emit("expired_session", socket.room);
 
     next();
@@ -138,13 +147,55 @@ io.on("connection", async (socket) => {
 
   socket.join(socket.room);
 
-  const history = (await db.collection(messagesCollection).find({room: socket.room }).toArray());
+  const history = (await db.collection(messagesCollection).find({ room: socket.room }).toArray());
 
   io.to(socket.room).emit("room", socket.room);
 
   io.to(socket.room).emit("history", history);
 
   socket.on("message", async (text) => {
+
+    const imageUrlRegex = /(https?:\/\/[^\s]+)/;
+    let imageUrl = text.match(imageUrlRegex);
+
+    if (imageUrl) {
+      imageUrl = imageUrl[0];
+      const nsfwjs = await loadModel();
+      console.log(imageUrl);
+
+      const directory = '/tmp';
+      const fileName = path.basename(imageUrl);
+
+      const filePath = path.join(directory, fileName);
+      const file = fs.createWriteStream(filePath);
+
+
+      const client = imageUrl.startsWith('https') ? https : http;
+
+      client.get(imageUrl, async function (response) {
+        console.log("AQUI");
+
+        response.pipe(file);
+
+        file.on('finish', async function () {
+          file.close();
+          console.log('Imagem salva com sucesso em ' + filePath);
+          const img = await loadImage(filePath);
+          const predictions = await nsfwjs.classify(img);
+          if (predictions[0].className === 'Porn' && predictions[0].probability > 0.5) {
+            text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
+          }
+        });
+
+      }).on('error', function (err) {
+        fs.unlink(filePath);
+        console.error('Erro ao salvar a imagem: ', err.message);
+      });
+
+
+
+    }
+
     const message = {
       userId: socket.user._id,
       userName: socket.user.name,
@@ -153,6 +204,7 @@ io.on("connection", async (socket) => {
       timestamp: new Date(),
     };
 
+    console.log(message);
     await db.collection(messagesCollection).insertOne(message);
 
     io.to(socket.room).emit("message", message);
@@ -183,5 +235,15 @@ function makeid(length) {
   return result;
 }
 
+async function loadModel() {
+  const nsfwjs = await NSFWJS.load();
+  return nsfwjs;
+}
+
+async function loadImage(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const image = tfn.node.decodeImage(buffer);
+  return image;
+}
 
 module.exports = app;
