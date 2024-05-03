@@ -193,7 +193,11 @@ io.on("connection", async (socket) => {
               file.on('finish', async function () {
                 file.close();
                 console.log('Imagem salva com sucesso em ' + filePath);
-                const img = await loadImage(filePath);
+                // const img = await loadImage(filePath);
+
+                const buffer = fs.readFileSync(filePath);
+                const img = tfn.node.decodeImage(buffer);
+                
                 const predictions = await nsfwjs.classify(img);
                 console.log(predictions);
                 if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.15)) {
@@ -267,12 +271,6 @@ function makeid(length) {
 async function loadModel() {
   const nsfwjs = await NSFWJS.load();
   return nsfwjs;
-}
-
-async function loadImage(filePath) {
-  const buffer = fs.readFileSync(filePath);
-  const image = tfn.node.decodeImage(buffer);
-  return image;
 }
 
 cron.schedule('*/15 * * * *', async () => {
