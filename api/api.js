@@ -162,6 +162,14 @@ io.on("connection", async (socket) => {
 
     if (imageUrl) {
 
+      io.to(socket.room).emit("message", {
+        userId: "SYSTEM",
+        userName: "System",
+        room: socket.room,
+        text: "Wait, processing image",
+        timestamp: new Date(),
+      });
+
       imageUrl = imageUrl[0];
       const nsfwjs = await loadModel();
 
