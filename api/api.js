@@ -163,7 +163,6 @@ io.on("connection", async (socket) => {
 
       imageUrl = imageUrl[0];
       const nsfwjs = await loadModel();
-      console.log(imageUrl);
 
       const directory = '/tmp';
       const fileName = path.basename(imageUrl);
@@ -176,19 +175,23 @@ io.on("connection", async (socket) => {
 
       await new Promise((resolve, reject) => {
         client.get(imageUrl, async function (response) {
-          console.log("AQUI");
           response.pipe(file);
-          file.on('finish', async function () {
-            file.close();
-            console.log('Imagem salva com sucesso em ' + filePath);
-            const img = await loadImage(filePath);
-            const predictions = await nsfwjs.classify(img);
-            console.log(predictions);
-            if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.01)) {
-              text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
-              console.log(text);
-            }
-          });
+
+          await new Promise((resolve, reject) => {
+            file.on('finish', async function () {
+              file.close();
+              console.log('Imagem salva com sucesso em ' + filePath);
+              const img = await loadImage(filePath);
+              const predictions = await nsfwjs.classify(img);
+              console.log(predictions);
+              if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.01)) {
+                text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
+                console.log(text);
+              }
+              resolve();
+            }).on('error', function (err) { reject(err) });
+          })
+
           resolve();
         }).on('error', function (err) {
           fs.unlink(filePath);
@@ -196,6 +199,7 @@ io.on("connection", async (socket) => {
           reject(err);
         });
       });
+
     }
 
     const message = {
