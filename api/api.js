@@ -21,6 +21,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const mongodb = require("mongodb");
 var cors = require("cors");
+const { log } = require('util');
 const app = express();
 app.disable('x-powered-by');
 
@@ -182,6 +183,7 @@ io.on("connection", async (socket) => {
           console.log('Imagem salva com sucesso em ' + filePath);
           const img = await loadImage(filePath);
           const predictions = await nsfwjs.classify(img);
+          console.log(predictions);
           if (predictions[0].className === 'Porn' && predictions[0].probability > 0.5) {
             text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
           }
