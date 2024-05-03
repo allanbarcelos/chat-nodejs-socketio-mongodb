@@ -193,7 +193,7 @@ io.on("connection", async (socket) => {
               const img = await loadImage(filePath);
               const predictions = await nsfwjs.classify(img);
               console.log(predictions);
-              if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.01)) {
+              if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.15)) {
                 text = text.replace(imageUrlRegex, '<b>BLOCKED, SEXUAL CONTENT</b>');
                 console.log(text);
               }

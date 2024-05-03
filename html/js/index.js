@@ -42,7 +42,7 @@ socket.on("message", (message) => {
   const div = document.createElement("div");
   div.className = message.userId;
 
-  const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b/i;
+  const regex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b|data:image\/(jpeg|png|gif);base64,[^\s]+\b/i;
 
   if (regex.test(message.text)) {
     div.innerHTML = `<strong>${message.userName}</strong>: <img src="${message.text}" width="300" height="300" />`;
