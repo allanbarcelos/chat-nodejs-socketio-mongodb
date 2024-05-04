@@ -4,6 +4,7 @@ const fs = require('fs');
 const NSFWJS = require('nsfwjs');
 const cron = require('node-cron');
 const crypto = require('crypto');
+const imageType = require('image-type');
 
 const http = require('http');
 const https = require('https');
@@ -183,6 +184,20 @@ io.on("connection", async (socket) => {
         const filePath = path.join(directory, `${hash}${ext}`);
         const file = fs.createWriteStream(filePath);
 
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp'];
+
+        const imageType = await getImageType(filePath);
+
+        if (!validImageTypes.includes(imageType)) {
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error('Erro ao excluir o arquivo:', err);
+            }
+            console.log('Arquivo excluído com sucesso:', filePath);
+          });
+          throw new Error('Unsupported image type');
+        }
+
 
         const client = imageUrl.startsWith('https') ? https : http;
 
@@ -197,7 +212,7 @@ io.on("connection", async (socket) => {
 
                 const buffer = fs.readFileSync(filePath);
                 const img = tfn.node.decodeImage(buffer);
-                
+
                 const predictions = await nsfwjs.classify(img);
                 console.log(predictions);
                 if (predictions.some(prediction => (prediction.className === 'Porn' || prediction.className === 'Sexy' || prediction.className === 'Hentai') && prediction.probability > 0.15)) {
@@ -278,5 +293,17 @@ cron.schedule('*/15 * * * *', async () => {
   yesterday.setDate(yesterday.getDate() - 1);
   await db.collection(messagesCollection).deleteMany({ timestamp: { $lt: yesterday } });
 });
+
+
+function getImageType(filePath) {
+  return new Promise((resolve, reject) => {
+    const buffer = fs.readFileSync(filePath);
+    const type = imageType(buffer);
+    if (!type) {
+      reject(new Error('Could not determine image type'));
+    }
+    resolve(type.mime);
+  });
+}
 
 module.exports = app;
