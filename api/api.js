@@ -1,5 +1,7 @@
 // api.js
 
+const dotenv = require('dotenv');
+const path = require('path');
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -13,6 +15,8 @@ const { checkExistUserByEmail, createNewUser, getUserById } = require("./user");
 const { makeid, sanitizeImage } = require("./utils");
 
 const imageRegex = /\b(https?|ftp):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif)\b|data:image\/(jpeg|png|gif);base64,[^\s]+\b/i;
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.disable('x-powered-by');
