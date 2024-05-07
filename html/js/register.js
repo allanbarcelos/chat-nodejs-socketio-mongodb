@@ -1,11 +1,8 @@
 // REGISTER
 const api = `//${window.location.hostname}/api`;
-
 const form = document.querySelector("#register-form");
-
 const registerButton = document.getElementById("register-button");
 const loadingButton = document.getElementById("loading-button");
-
 loadingButton.style.display = "none";
 registerButton.style.display = "block";
 

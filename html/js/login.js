@@ -1,8 +1,6 @@
 // LOGIN
 const api = `//${window.location.hostname}/api`;
-
 const form = document.querySelector("#login-form");
-
 const roomIdDiv = document.querySelector("#room-id-div");
 roomIdDiv.style.display = "none";
 
