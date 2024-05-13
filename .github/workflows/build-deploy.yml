@@ -83,6 +83,7 @@ jobs:
             else
               pm2 -s restart ${{secrets.PM2_PROCESS_NAME}}
             fi
+            pm2 save
 
       - name: Restart Nginx
         uses: appleboy/ssh-action@master
